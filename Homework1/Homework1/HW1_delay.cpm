@@ -1,0 +1,112 @@
+/*Guillermo Alicea
+**Homework 1 - Producer/2Consumer (delay)
+**06/08/15
+*/
+//constants
+const int BUFFERSIZE = 5;
+const int MAXITEMS = 100;
+const int DELAY = 1;
+const int DELAYTIME = 25;
+semaphore full, empty, mutex;
+
+//count and flag used to know when to stop/signal. In and out used
+//to insert and take from buffer.
+int count = 100, flag = 0, in = 0, out = 0, buffer[BUFFERSIZE];
+
+void producer()
+{	
+	//only producer needs this int since it is the only one inserting
+	int item = 1;
+	while (item <= MAXITEMS)
+	{	
+		p(full);
+		p(mutex);
+
+		cout << "Item " << item << " produced" << endl;
+		buffer[in] = item;
+		//we are constantly inserting and taking, so by the time we get to index 4,
+		//for example, we will have, most likely, already taken from the previous elements,
+		//therefore, we can just loop around to the start of the buffer again. Same concept for "out".
+		in = (in + 1) % BUFFERSIZE;
+		item++;
+
+		v(mutex);
+		v(empty);
+	}
+	
+}
+void consumer1()
+{
+	int i;
+	while (1)
+	{	
+		//delay for test case #2
+		if (DELAY == 1)
+			for(i = 0; i < DELAYTIME; i++);
+		p(empty);
+		p(mutex);
+
+		if (count == 0)
+		{
+			v(mutex);
+			break;
+		}
+		//if we have found the last item, let's set the flag to true, so we
+		//can break once we gotten the last item
+		else if (count == 1)
+			flag = 1;	
+		cout << "Item " << buffer[out] << " consumed by C1" << endl;
+		out = (out + 1) % BUFFERSIZE;
+		count--;
+
+		v(mutex);
+		v(full);
+		if (flag == 1)
+		{
+			v(empty);
+			break;
+		}
+	}
+}
+void consumer2()
+{
+	while (1)
+	{
+		p(empty);
+		p(mutex);
+
+		//no items left, time to break
+		if (count == 0)
+		{
+			v(mutex);
+			break;
+		}
+		else if (count == 1)
+			flag = 1;
+		cout << "Item " << buffer[out] << " consumed by C2" << endl;
+		out = (out + 1) % BUFFERSIZE;
+		count--;
+
+		v(mutex);
+		v(full);
+		if (flag == 1)
+		{
+			v(empty);
+			break;
+		}
+	}
+}
+main()
+{	
+	//initialize semaphors
+	initialsem(full, 5);
+	initialsem(empty, 0);
+	initialsem(mutex, 1);
+	//begin tasks
+	cobegin
+	{	
+		producer();
+		consumer1();
+		consumer2();
+	}
+}

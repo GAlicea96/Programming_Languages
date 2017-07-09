@@ -1,0 +1,93 @@
+BACI System: C-- to PCODE Compiler, 10/03/2010
+Source file: C:\Users\Guillermo\Documents\CompSciP\COP4020\Homework2\HW2_readerpref.cpm  Fri Jun 17 20:45:15 2016
+ line  pc
+   1    0  binarysem output;
+   2    0  monitor readersWriters
+   3    0  {
+   4    0  	int readercount = 0;
+   5    0  	int busy = 0;
+   6    0  	condition oktoread, oktowrite;
+   7    0  
+   8    0  	//reader count is utilized to facilitate the preference of readers
+   9    0  	//over writers
+  10    0  	void startread()
+  11    1  	{
+  12    1  		if (busy == 1)
+  13    5  			waitc(oktoread);
+  14    8  		readercount = readercount + 1;
+  15   13  		signalc(oktoread);
+  16   15  	}
+  17   17  	void endread()
+  18   18  	{
+  19   18  		readercount = readercount - 1;
+  20   23  		if (readercount == 0)
+  21   27  			signalc(oktowrite);
+  22   29  	}	
+  23   31  	void startwrite()
+  24   32  	{
+  25   32  		if ((busy == 1) || (readercount != 0))
+  26   40  			waitc(oktowrite);
+  27   43  		busy = 1;
+  28   46  	}
+  29   48  	void endwrite()
+  30   49  	{
+  31   49  		busy = 0;
+  32   52  		if (!empty(oktoread))
+  33   56  			signalc(oktoread);
+  34   58  		else 
+  35   59  			signalc(oktowrite);
+  36   61  	}
+  37   63  }
+  38   70  void reader(int i)
+  39   70  {
+  40   70  	int count = 0;
+  41   73  	while (1)
+  42   75  	{
+  43   75  		startread();
+  44   78  		p(output);
+  45   80  		cout << "Reader " << i <<  " enters the critical section" << endl;
+  46   85  		v(output);
+  47   87  		count = count + 1;
+  48   92  		endread();
+  49   95  		p(output);
+  50   97  		cout << "Reader " << i << " leaves the critical section" << endl;
+  51  102  		v(output);
+  52  104  		if (count == 6)
+  53  108  			break;
+  54  109  	}
+  55  110  }
+  56  111  void writer(int i)
+  57  111  {
+  58  111  	int count = 0;
+  59  114  	while (1)
+  60  116  	{
+  61  116  		startwrite();
+  62  119  		p(output);
+  63  121  		cout << "Writer " << i << " enters the critical section" << endl;
+  64  126  		v(output);
+  65  128  		count = count + 1;
+  66  133  		endwrite();
+  67  136  		p(output);
+  68  138  		cout << "Writer " << i << " leaves the critical section" << endl;
+  69  143  		v(output);
+  70  145  		if (count == 3)
+  71  149  			break;
+  72  150  	}
+  73  151  }
+  74  152  main()
+  75  153  {
+  76  153  	initialsem(output, 1);
+  77  156  	cobegin
+  78  157  	{
+  79  157  		reader(1);
+  80  161  		reader(2);
+  81  165  		reader(3);
+  82  169  		reader(4);
+  83  173  		reader(5);
+  84  177  		reader(6);
+  85  181  		writer(1);
+  86  185  		writer(2);
+  87  189  		writer(3);	
+  88  193  		writer(4);
+  89  197  	}
+  90  198  }

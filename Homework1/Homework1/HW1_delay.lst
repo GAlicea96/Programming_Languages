@@ -1,0 +1,115 @@
+BACI System: C-- to PCODE Compiler, 10/03/2010
+Source file: C:\Users\Guillermo\Documents\CompSciP\COP4020\HW1_delay.cpm  Wed Jun 08 21:48:01 2016
+ line  pc
+   1    0  /*Guillermo Alicea
+   2    0  **Homework 1 - Producer/2Consumer
+   3    0  **06/08/15
+   4    0  */
+   5    0  //constants
+   6    0  const int BUFFERSIZE = 5;
+   7    0  const int MAXITEMS = 100;
+   8    0  const int DELAY = 1;
+   9    0  const int DELAYTIME = 25;
+  10    0  semaphore full, empty, mutex;
+  11    0  
+  12    0  //count and flag used to know when to stop/signal. In and out used
+  13    0  //to insert and take from buffer.
+  14    0  int count = 100, flag = 0, in = 0, out = 0, buffer[BUFFERSIZE];
+  15    0  
+  16    0  void producer()
+  17    0  {	
+  18    0  	//only producer needs this int since it is the only one inserting
+  19    0  	int item = 1;
+  20    3  	while (item <= MAXITEMS)
+  21    7  	{	
+  22    7  		p(full);
+  23    9  		p(mutex);
+  24   11  
+  25   11  		cout << "Item " << item << " produced" << endl;
+  26   16  		buffer[in] = item;
+  27   21  		//we are constantly inserting and taking, so by the time we get to index 4,
+  28   21  		//for example, we will have, most likely, already taken from the previous elements,
+  29   21  		//therefore, we can just loop around to the start of the buffer again. Same concept for "out".
+  30   21  		in = (in + 1) % BUFFERSIZE;
+  31   28  		item++;
+  32   33  
+  33   33  		v(mutex);
+  34   35  		v(empty);
+  35   37  	}
+  36   38  	
+  37   38  }
+  38   39  void consumer1()
+  39   39  {
+  40   39  	int i;
+  41   39  	while (1)
+  42   41  	{	
+  43   41  		//delay for test case #2
+  44   41  		if (DELAY == 1)
+  45   45  			for(i = 0; i < DELAYTIME; i++);
+  46   60  		p(empty);
+  47   62  		p(mutex);
+  48   64  
+  49   64  		if (count == 0)
+  50   68  		{
+  51   68  			v(mutex);
+  52   70  			break;
+  53   71  		}
+  54   71  		//if we have found the last item, let's set the flag to true, so we
+  55   71  		//can break once we gotten the last item
+  56   71  		else if (count == 1)
+  57   76  			flag = 1;	
+  58   79  		cout << "Item " << buffer[out] << " consumed by C1" << endl;
+  59   87  		out = (out + 1) % BUFFERSIZE;
+  60   94  		count--;
+  61   99  
+  62   99  		v(mutex);
+  63  101  		v(full);
+  64  103  		if (flag == 1)
+  65  107  		{
+  66  107  			v(empty);
+  67  109  			break;
+  68  110  		}
+  69  110  	}
+  70  111  }
+  71  112  void consumer2()
+  72  112  {
+  73  112  	while (1)
+  74  114  	{
+  75  114  		p(empty);
+  76  116  		p(mutex);
+  77  118  
+  78  118  		//no items left, time to break
+  79  118  		if (count == 0)
+  80  122  		{
+  81  122  			v(mutex);
+  82  124  			break;
+  83  125  		}
+  84  125  		else if (count == 1)
+  85  130  			flag = 1;
+  86  133  		cout << "Item " << buffer[out] << " consumed by C2" << endl;
+  87  141  		out = (out + 1) % BUFFERSIZE;
+  88  148  		count--;
+  89  153  
+  90  153  		v(mutex);
+  91  155  		v(full);
+  92  157  		if (flag == 1)
+  93  161  		{
+  94  161  			v(empty);
+  95  163  			break;
+  96  164  		}
+  97  164  	}
+  98  165  }
+  99  166  main()
+ 100  167  {	
+ 101  167  	//initialize semaphors
+ 102  167  	initialsem(full, 5);
+ 103  170  	initialsem(empty, 0);
+ 104  173  	initialsem(mutex, 1);
+ 105  176  	//begin tasks
+ 106  176  	cobegin
+ 107  177  	{	
+ 108  177  		producer();
+ 109  180  		consumer1();
+ 110  183  		consumer2();
+ 111  186  	}
+ 112  187  }

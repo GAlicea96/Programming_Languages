@@ -1,0 +1,94 @@
+/*Guillermo Alicea
+**Homework 2 - Monitors (reader preferred)
+**06/17/15
+*/
+binarysem output;
+monitor readersWriters
+{
+	int readercount = 0;
+	int busy = 0;
+	condition oktoread, oktowrite;
+
+	//reader count is utilized to facilitate the preference of readers
+	//over writers
+	void startread()
+	{
+		if (busy == 1)
+			waitc(oktoread);
+		readercount = readercount + 1;
+		signalc(oktoread);
+	}
+	void endread()
+	{
+		readercount = readercount - 1;
+		if (readercount == 0)
+			signalc(oktowrite);
+	}	
+	void startwrite()
+	{
+		if ((busy == 1) || (readercount != 0))
+			waitc(oktowrite);
+		busy = 1;
+	}
+	void endwrite()
+	{
+		busy = 0;
+		if (!empty(oktoread))
+			signalc(oktoread);
+		else 
+			signalc(oktowrite);
+	}
+}
+void reader(int i)
+{
+	int count = 0;
+	while (1)
+	{
+		startread();
+		p(output);
+		cout << "Reader " << i <<  " enters the critical section" << endl;
+		v(output);
+		count = count + 1;
+		endread();
+		p(output);
+		cout << "Reader " << i << " leaves the critical section" << endl;
+		v(output);
+		if (count == 6)
+			break;
+	}
+}
+void writer(int i)
+{
+	int count = 0;
+	while (1)
+	{
+		startwrite();
+		p(output);
+		cout << "Writer " << i << " enters the critical section" << endl;
+		v(output);
+		count = count + 1;
+		endwrite();
+		p(output);
+		cout << "Writer " << i << " leaves the critical section" << endl;
+		v(output);
+		if (count == 3)
+			break;
+	}
+}
+main()
+{
+	initialsem(output, 1);
+	cobegin
+	{
+		reader(1);
+		reader(2);
+		reader(3);
+		reader(4);
+		reader(5);
+		reader(6);
+		writer(1);
+		writer(2);
+		writer(3);	
+		writer(4);
+	}
+}
