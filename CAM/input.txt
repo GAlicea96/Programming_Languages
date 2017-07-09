@@ -1,0 +1,14 @@
+0 load ()
+1 quote 1
+2 cons
+3 quote 4
+4 cons
+5 cur 8
+6 app
+7 stop
+8 dupl
+9 fst
+10 swap
+11 snd
+12 plus
+13 return

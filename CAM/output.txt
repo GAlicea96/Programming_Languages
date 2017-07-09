@@ -1,0 +1,279 @@
+Test case #1:
+
+0 load ()
+1 quote 1
+2 cons
+3 quote 4
+4 cons
+5 cur 8
+6 app
+7 stop
+8 dupl
+9 fst
+10 swap
+11 snd
+12 plus
+13 return
+
+Instruction: load ()
+cr = 0	mr = 0	sr = 0
+stack : [ 0 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote 1
+cr = 1	mr = 0	sr = 0
+stack : [ -4611686018427387904 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 2	mr = 0	sr = 1
+stack : [ -4611686018427387904 1 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote 4
+cr = 3	mr = 2	sr = 0
+stack : [ 1000000 1 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 4	mr = 2	sr = 1
+stack : [ 1000000 4 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: cur 8
+cr = 5	mr = 4	sr = 0
+stack : [ 1000002 4 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: app
+cr = 6	mr = 4	sr = 1
+stack : [ 1000002 8 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: dupl
+cr = 8	mr = 4	sr = 1
+stack : [ 7 1000002 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: fst
+cr = 9	mr = 4	sr = 2
+stack : [ 7 1000002 1000002 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: swap
+cr = 10	mr = 4	sr = 2
+stack : [ 7 1000002 4 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: snd
+cr = 11	mr = 4	sr = 2
+stack : [ 7 4 1000002 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: plus
+cr = 12	mr = 4	sr = 2
+stack : [ 7 4 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: return
+cr = 13	mr = 4	sr = 1
+stack : [ 7 5 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: stop
+cr = 7	mr = 4	sr = 0
+stack : [ 5 5 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+stop	cr = 8	mr = 4	sr = 0
+
+--This is the output after running the program using the first
+test case.
+
+**It is important to note that min_int (-4611686018427387904) represents nil or (end of list)
+and elements that are >= 1000000 represent addresses in mem at
+(element - 1000000). Additionally, the test case is run with an array size of
+10, simply to make for nice output - it will be changed to 50 (which the
+professor said would be fine) in cam.ml. Also, "stop" does not have a direct
+set of instructions, yet in the test case it seems to increment cr before stopping
+the CAM, so I chose to output (cr+1) instead of cr just so that it would match
+the test case, and presumably the instructions for stop (I think it should
+not be incremented since the program is stopped at the cr corresponding to stop however
+that is why you will see the cr incremented after "stop" is encountered).
+
+--The output coincides with the expected output, except for the fact that
+stack (in my implementation) does not erase elements that are at positions
+greater than sr, as the ISA does not explicitly have a POP, it merely
+decrements that sr. Therefore, the stack should be checked from index sr
+down to index 0, in order to more closely compare it to the test case's output.
+
+**The assignment states that there are two cases, yet the only other case
+is one that has preloaded elements in memory (a pair which is not even accounted
+for in the ISA, since fst and snd only access a single element in mem,
+not a pair contained within one of those elements) and a preloaded address in stack,
+plus the fact that the ISA does not directly pairs as in the test case,
+I just wrote the cam in such a way that it would initialize the mem and stack
+and make it fit the ISA (working with numbers in elements, not pairs)
+
+Test case #2:
+
+0 load ()
+1 quote 2
+2 cons
+3 quote -11
+4 cons
+5 dupl
+6 fst
+7 swap
+8 snd
+9 mult
+10 stop
+
+Instruction: load ()
+cr = 0	mr = 0	sr = 0
+stack : [ 0 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote 2
+cr = 1	mr = 0	sr = 0
+stack : [ -4611686018427387904 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 2	mr = 0	sr = 1
+stack : [ -4611686018427387904 2 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote -11
+cr = 3	mr = 2	sr = 0
+stack : [ 1000000 2 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 4	mr = 2	sr = 1
+stack : [ 1000000 -11 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: dupl
+cr = 5	mr = 4	sr = 0
+stack : [ 1000002 -11 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+Instruction: fst
+cr = 6	mr = 4	sr = 1
+stack : [ 1000002 1000002 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+Instruction: swap
+cr = 7	mr = 4	sr = 1
+stack : [ 1000002 -11 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+Instruction: snd
+cr = 8	mr = 4	sr = 1
+stack : [ -11 1000002 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+Instruction: mult
+cr = 9	mr = 4	sr = 1
+stack : [ -11 2 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+Instruction: stop
+cr = 10	mr = 4	sr = 0
+stack : [ -22 2 0 0 0 0 0 0 0 0 ]
+mem   : [ 2 -4611686018427387904 -11 1000000 0 0 0 0 0 0 ]
+stop	cr = 11	mr = 4	sr = 0
+
+--This is the output after running the second test case.
+
+--This ends up being similar to test case 1, except without the call.
+You can see however, that the output is still correct, as we have
+the product of the two "quotes" (2 and 9) at stack[0] by the time we encounter stop.
+
+
+**The assignment calls for a compare and contrast of the two outputs,
+however since the 2nd test case was in a sense incomplete (and i believe
+the first test case is simply the cam code corresponding to the lambda
+expression of the first test case), I will simply compare these two cases:
+
+Compare:
+
+    -The same procedure for either summing or multiplying the two
+    "quote" values is followed : dupl, fst, swap, snd, (plus or mult)
+    -The have the correct output regardless of a call/return being present
+
+Contrast:
+
+    -Test case 1 uses a call ("app") and return, while test case 2
+    does everything in one body
+    -Test case 1 is adding and Test case 2 is multiplying (although
+    this is only a difference of 1 operation within 1 instruction)
+    -Test case 2 shows an example with multiple digits and a negative number -
+    while obtaining the correct output
+
+--Again, the assignment really only seems to contain one true test case,
+so these two test cases, at least in the order in which they execute
+their instructions, are quite similar.
+
+branch test example:
+
+0 load ()
+1 quote 1
+2 cons
+3 quote 4
+4 cons
+5 cur 8
+6 app
+7 stop
+8 dupl
+9 fst
+10 branch 11 4
+11 swap
+12 snd
+13 plus
+14 return
+
+output:
+
+Instruction: load ()
+cr = 0	mr = 0	sr = 0
+stack : [ 0 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote 1
+cr = 1	mr = 0	sr = 0
+stack : [ -4611686018427387904 0 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 2	mr = 0	sr = 1
+stack : [ -4611686018427387904 1 0 0 0 0 0 0 0 0 ]
+mem   : [ 0 0 0 0 0 0 0 0 0 0 ]
+Instruction: quote 4
+cr = 3	mr = 2	sr = 0
+stack : [ 1000000 1 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: cons
+cr = 4	mr = 2	sr = 1
+stack : [ 1000000 4 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 0 0 0 0 0 0 0 0 ]
+Instruction: cur 8
+cr = 5	mr = 4	sr = 0
+stack : [ 1000002 4 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: app
+cr = 6	mr = 4	sr = 1
+stack : [ 1000002 8 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: dupl
+cr = 8	mr = 4	sr = 1
+stack : [ 7 1000002 0 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: fst
+cr = 9	mr = 4	sr = 2
+stack : [ 7 1000002 1000002 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: branch 11 4
+cr = 10	mr = 4	sr = 2
+stack : [ 7 1000002 4 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: swap
+cr = 11	mr = 4	sr = 2
+stack : [ 7 1000002 11 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: snd
+cr = 12	mr = 4	sr = 2
+stack : [ 7 11 1000002 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: plus
+cr = 13	mr = 4	sr = 2
+stack : [ 7 11 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: return
+cr = 14	mr = 4	sr = 1
+stack : [ 7 12 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+Instruction: stop
+cr = 7	mr = 4	sr = 0
+stack : [ 12 12 1 0 0 0 0 0 0 0 ]
+mem   : [ 1 -4611686018427387904 4 1000000 0 0 0 0 0 0 ]
+stop	cr = 8	mr = 4	sr = 0
+
+**As you can see, the branch was taken as the final result is 12 (11 + 1),
+instead of 5 (4 + 1); the branch was taken because when the branch instruction
+was reached, stack[sr] was equal to 4 (not 0)
